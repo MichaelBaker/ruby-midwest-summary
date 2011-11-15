@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Presentation</title>
+    <meta charset='utf-8'>
+    <script
+      src='slides.js'></script>
+  </head>
+
+  <style>
+    .snark { font-size: 16px; }
+    .slides.template-default .github h1 { color: #CD2E2C; }
+    .slides.template-default .active-record-anti-patterns  h1,
+    .slides.template-default .active-record-anti-patterns  h2 { color: #3432B3;}
+    .slides.template-default .high-performance-ruby h1 { color: #508048; }
+    .slides.template-default .confident-code h1,
+    .slides.template-default .confident-code h3 { color: #EDCD2B; }
+    .slides.template-default .robert-martin h1 { color: #7959A7; }
+    .slides.template-default .andy-hunt h1 { color: #828071; }
+  </style>
+
+  <body style='display: none'>
+    <section class='slides layout-regular template-default'>
+      <article>
+        <h1>
+          Ruby Midwest
+          <br>
+          (or the worst microphones in the Midwest)
+        </h1>
+        <p>
+          Michael Baker
+          <br>
+          November 14, 2011
+        </p>
+      </article>
+
+      <article class="github">
+        <h1>How github uses github to build github</h1>
+        <p>
+          Zach Holman @holman
+        </p>
+      </article>
+
+      <article class="github">
+        <h1>The Big Idea: <br>Work asynchronously</h1>
+        <p class="snark">Also, look how cool Github is. We're pretty much the best.</p>
+      </article>
+
+      <article class="github">
+        <ul>
+          <li>chatrooms with logs instead of meetings </li>
+          <li>pull requests as code review and discussion</li>
+          <li>Automate anything you can</li>
+          <li>Super secret tip: add ?w=1 to hide whitespace in diffs</li>
+        </ul>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h1>Active Record anti-patterns</h1>
+        <p>
+          Ethan Gunderson @ethangunderson
+        </p>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h1>The Big Idea: <br>Your ORM is hella leaky</h1>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h1>Wicked fast schema changes</h1>
+        <pre>
+change_table(:so_wrong, :bulk => true) do |t|
+  t.add_column :so_wrong, :the_right_thang, :string
+  t.remove_column :so_wrong, :the_wrong_thang
+end</pre>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h1>ActiveRecord::Base#all is so freakin' bad</h1>
+        <pre>
+# 10^80 * 1 byte = 10^56 yottabytes = 10^68 terabytes of memory
+AtomsInTheUniverse.all.each do |atom|
+  atom.jostle
+end
+
+# 1000 bytes = 1 kilobyte of memory
+AtomsInTheUniverse.find_each do |atom|
+  atom.jostle
+end</pre>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h2>N+1 >>>>> 2</h2>
+        <pre>
+# select * from old_ladies;
+# select * from cats where old_ladies_id = 1;
+# select * from cats where old_ladies_id = 2;
+# select * from cats where old_ladies_id = 3;
+# etc...
+OldLady.find_each do |lady|
+  puts lady.cat
+end
+
+# select * from old_ladies;
+# select * from cats where old_ladies_id in [1, 2, 3, 4];
+OldLady.include(:cats).find_each do |lady|
+  puts lady.cat
+end</pre>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h1>validates_uniqueness_of doesn't work</h1>
+        <p>
+          Here be a race condition!
+        </p>
+        <pre>
+create_index :snowflakes, :shape, :unique => true</pre>
+      </article>
+
+      <article class="active-record-anti-patterns">
+        <h1>Help me to make better queries!</h1>
+        <p>
+          Ok, here you go: <br>
+          github.com/nesquena/query_reviewer <br>
+          github.com/trtpcolin/consistency_fail
+        </p>
+      </article>
+
+      <article class="high-performance-ruby">
+        <h1>High Performance Ruby: Evented vs. threaded</h1>
+        <p>
+          Dr. Nic Williams @drnic
+        </p>
+      </article>
+
+      <article class="high-performance-ruby">
+        <h1>Evented -> <br> threads -> <br> Your code</h1>
+      </article>
+
+      <article class="high-performance-ruby">
+        <h1>The Big Idea: <br>nginx -> <br> trinidad -> <br> your app</h1>
+      </article>
+
+      <article class="confident-code">
+        <h1>Confident Code</h1>
+        <p>
+          Avdi Grimm @avdi
+        </p>
+      </article>
+
+      <article class="confident-code">
+        <h1>The Big Idea:<br>Code should flow like a good story</h1>
+      </article>
+
+      <article class="confident-code">
+        <h3>Here's how your method should look</h3>
+        <ol>
+          <li>Gather input</li>
+          <li>Perform work</li>
+          <li>Deliver results</li>
+          <li>Handle failure &mdash; this goes outside of your method</li>
+        </ol>
+      </article>
+
+      <article class="confident-code">
+        <h3>Here are your options for bad input</h3>
+        <ul>
+          <li>Coerce <br>
+              <code>Array(nil) => []</code> <br>
+              <code>Array("A STRING!") => ["A STRING!"]</code> <br>
+              <code>Array([1,2,3]) = [1,2,3]</code>
+          </li>
+          <li>Reject <br>
+              <code>raise ArgumentError.new if the_argument.nil?</code></li>
+          <li>Ignore <br>
+              <code>return [] if the_argument.nil?</code></li>
+        </ul>
+      </article>
+
+      <article class="confident-code">
+        <h1>Use fetch</h1>
+        <pre>
+da_best_hash = {}
+da_best_hash.fetch(:the_bomb) => KeyError: key not found
+da_best_hash.fetch(:the_bomb, :default_bomb) => :default_bomb
+da_best_hash.fetch(:the_bomb) {|key| Bomb.new(key)} => #&lt;Bomb:0x000239&gt;</pre>
+      </article>
+
+      <article class="robert-martin">
+        <h1>Your Application is not Rails</h1>
+        <p>
+          Robert "Uncle Bob" Martin @unclebobmartin
+        </p>
+      </article>
+
+      <article class="robert-martin">
+        <h1>Based on this blog post</h1>
+        <p>
+          http://blog.8thlight.com/uncle-bob/2011/09/30/Screaming-Architecture.html
+        </p>
+      </article>
+
+      <article class="robert-martin">
+        <h1>The Big Idea:<br>Build your application, then deliver it with Rails(maybe)</h1>
+      </article>
+
+      <article class="robert-martin">
+        <h1>Defer decisions about tools until you absolutely must make them</h1>
+      </article>
+
+      <article class="robert-martin">
+        <h1>Why?</h1>
+      </article>
+
+      <article class="andy-hunt">
+        <h1>Relearing Agile</h1>
+        <p>
+          Andy Hunt @pragmaticandy
+        </p>
+      </article>
+
+      <article class="andy-hunt">
+        <h1>The Agile Manifesto</h1>
+        <p>
+          Individuals and interactions over processes and tools <br>
+          Working software over comprehensive documentation <br>
+          Customer collaboration over contract negotiation <br>
+          Responding to change over following a plan
+        </p>
+      </article>
+
+      <article class="andy-hunt">
+        <h1>The Big Idea: <br>RESPONDING TO CHANGE!!!!!!!!!!!!!!111~~</h1>
+      </article>
+
+      <article>
+        <h3>The Big Ideas:</h3>
+        <ul>
+          <li>Work asynchronously</li>
+          <li>Your ORM is hella leaky</li>
+          <li>Code should flow like a good story</li>
+          <li>nginx -> trinidad -> your app</li>
+          <li>Build your application, then deliver it with Rails(maybe)</li>
+          <li>RESPONDING TO CHANGE!!!!!!!!!!!!!!111~~</li>
+          <li>And for God's sake, don't return nil</li>
+        </ul>
+      </article>
+    </section>
+  </body>
+</html>
+
